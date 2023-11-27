@@ -1,0 +1,45 @@
+<!-- templates/upload_image.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Image</title>
+</head>
+<body>
+    <h2>Upload Image</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit">Upload</button>
+    </form>
+
+    <div id="result">
+        <!-- 여기에 모델의 결과를 표시할 부분 -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            fetch('/upload_image/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 결과를 받아와서 결과를 화면에 추가
+                resultDiv.innerText = `모델 예측 결과: ${data.result}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+    </script>
+</body>
+</html>
