@@ -19,41 +19,41 @@ def F1_score(y_true, y_pred):
     return f1_val
 
 @csrf_exempt
-def predict(image):
+def predict(request):
     #keras.utils.get_custom_objects()['F1_score'] = F1_score
+    if request.method == 'POST':
+        image = request.FILES['image']
+        model_path = os.path.join(BASE_DIR, 'efficientnet.h5')
+        model = load_model(model_path, custom_objects={'F1_score': F1_score})
 
-    model_path = os.path.join(BASE_DIR, 'efficientnet.h5')
-    model = load_model(model_path, custom_objects={'F1_score': F1_score})
-
-    image = Image.open(image).convert('RGB')
-    image = image.resize((640, 310))
+        image = Image.open(image).convert('RGB')
+        image = image.resize((640, 310))
 
     #image_array = np.array(image) / 255.0
 
-    predictions = model.predict(np.expand_dims(image, axis=0))
+        predictions = model.predict(np.expand_dims(image, axis=0))
 
-    result = {
-        'predictions': predictions.tolist(),
-        'label': str(np.argmax(predictions))
-    }
+        label = str(np.argmax(predictions))
 
-    print(result)
+    #print(result)
 
-    return result
+        return JsonResponse({'result': label}, status=200)
 
-def upload_image(request):
-    if request.method == 'POST':
-        form = UploadImageForm(request.POST, request.FILES)
-        if form.is_valid():
-            # 이미지 업로드하고 DB에 저장
-            uploaded_image = form.save()
+    return JsonResponse({'error': '유하지 않은 Request 요청입니다.'})
 
-            # 이미지를 predict 함수에 전달하여 결과 예측
-            predicted_result = predict(uploaded_image.image.path)
-
-            return JsonResponse({'result': predicted_result['label']})
-
-    else:
-        form = UploadImageForm()
-
-    return render(request, 'upload_image.html', {'form': form})
+# def upload_image(request):
+#     if request.method == 'POST':
+#         form = UploadImageForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             # 이미지 업로드하고 DB에 저장
+#             uploaded_image = form.save()
+#
+#             # 이미지를 predict 함수에 전달하여 결과 예측
+#             predicted_result = predict(uploaded_image.image.path)
+#
+#             return JsonResponse({'result': predicted_result['label']})
+#
+#     else:
+#         form = UploadImageForm()
+#
+#     return render(request, 'upload_image.html', {'form': form})
