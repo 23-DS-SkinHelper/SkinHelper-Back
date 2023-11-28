@@ -28,10 +28,9 @@ def predict(image):
     image = Image.open(image).convert('RGB')
     image = image.resize((640, 310))
 
-    # numpy 배열로 변환
-    image_array = np.array(image) / 255.0
+    #image_array = np.array(image) / 255.0
 
-    predictions = model.predict(np.expand_dims(image_array, axis=0))
+    predictions = model.predict(np.expand_dims(image, axis=0))
 
     result = {
         'predictions': predictions.tolist(),
